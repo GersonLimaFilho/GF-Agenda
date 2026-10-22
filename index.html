@@ -559,7 +559,7 @@ function cloudMessage(t){by('cloudMessage').textContent=t;}
 function cloudUI(){by('syncstate').textContent=cloudUser?'☁ Sincronizado: '+cloudUser.email:(sb?'☁ Projeto configurado • faça login para sincronizar':'Modo local • sem sincronização');by('cloudRefresh').classList.toggle('hidden',!cloudUser);by('cloudLogout').classList.toggle('hidden',!cloudUser);by('cloudMigrate').classList.toggle('hidden',!cloudUser||!localSnapshot().length);by('forgotPassword').textContent=cloudUser?'Alterar senha':'Esqueci minha senha';}
 
 // GF Agenda V4.4 — Web Push: cada dispositivo cadastra sua própria assinatura.
-const PUSH_VAPID_PUBLIC_KEY='SUBSTITUIR_PELA_CHAVE_PUBLICA_VAPID';
+const PUSH_VAPID_PUBLIC_KEY='BOb5fKTrgVeMCpNpiH3b5SL5zJ2ygBjSSK2i1Vn_HoO0cJk6brE6bKYHTFgiuOIHBPWjGl_cMFgh45OLeMxW2tc';
 const pushStatus=message=>{by('pushStatus').textContent=message;};
 const pushAvailable=()=>('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window)&&window.isSecureContext;
 function vapidBytes(base64){
