@@ -4,6 +4,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=1">
 <link rel="icon" type="image/png" sizes="180x180" href="./apple-touch-icon.png?v=1">
 <meta name="apple-mobile-web-app-title" content="GF Agenda">
+<meta name="theme-color" content="#0c0e12">
+<link rel="manifest" href="./manifest.webmanifest">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GF Agenda • Calendário e Financeiro</title>
 <style>
@@ -13,6 +15,13 @@
 .row.reposicao,.entry.reposicao{background:#175a38!important;border:1px solid #39d987!important;color:#f1fff6!important;font-weight:750;box-shadow:inset 4px 0 0 #55efa0;}
 .badge.reposicao{background:#2ac875!important;color:#07361f!important;font-weight:850;}
 .row.reposicao small,.entry.reposicao small{color:#c9fbe0!important;}
+
+/* GF Agenda V4.4 — preferências de notificações */
+.push-panel{border-color:#3b6654;background:linear-gradient(120deg,rgba(41,135,92,.15),#181b22)}
+.push-panel h2{margin:0 0 8px;font-size:19px}
+.push-panel .push-controls{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:12px 0}
+.push-panel .push-controls .btn{flex:0 1 auto}
+.push-preview{white-space:pre-wrap;background:#0e1513;border:1px solid #2d6048;border-radius:10px;padding:12px;font-size:13px;line-height:1.6;margin-top:10px}
 </style>
 </head>
 <body><main class="wrap">
@@ -24,11 +33,19 @@
 <p class="help" id="materialWeekRange"></p><div id="materialReminderList"></div>
 <p class="help" id="materialReminderHelp">Materiais de semanas anteriores continuam pendentes até você marcar como enviados.</p>
 </section>
+<section class="panel push-panel" id="pushPanel">
+<h2>🔔 Notificações diárias — 6h</h2>
+<p class="help">Receba um resumo somente quando houver compromissos pessoais ou reposições do dia, ou materiais pendentes. As aulas fixas normais não entram no aviso. Ative separadamente no iPhone e no iPad, abrindo o GF Agenda pela Tela de Início.</p>
+<div class="push-controls"><button type="button" class="btn primary" id="pushEnable">Ativar neste aparelho</button><button type="button" class="btn" id="pushDisable">Desativar neste aparelho</button><button type="button" class="btn" id="pushPreview">Ver resumo de hoje</button></div>
+<p class="help" id="pushStatus" aria-live="polite">Verificando disponibilidade de notificações…</p>
+<div id="pushPreviewBox" class="push-preview hidden"></div>
+<p class="help">O envio às 6h exige configurar o agendamento no Supabase. Ativar neste aparelho não inicia sozinho o envio automático.</p>
+</section>
 <div id="agendaSection"><section class="panel"><div class="toolbar"><div class="nav"><button type="button" class="btn" id="prev" aria-label="Mês anterior">‹</button><h2 id="title">Calendário</h2><button type="button" class="btn" id="next" aria-label="Próximo mês">›</button><button type="button" class="btn" id="today">Hoje</button></div><div class="views"><button type="button" class="btn" data-view="month" aria-pressed="false">Mês</button><button type="button" class="btn" data-view="week" aria-pressed="false">Semana</button><button type="button" class="btn" data-view="list" aria-pressed="true">Lista</button></div></div></section>
 <section id="monthView" class="panel"><div class="weekhead"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div class="month" id="calendar"></div></section>
 <section id="listView" class="panel hidden"><div class="list" id="list"></div></section>
 </div><section id="scaleSection" class="panel hidden"><h2 class="section-title">🟣 Alunos de escala</h2><p class="help">Cadastro sem horário fixo. O pagamento mensal continua normalmente, mesmo quando as aulas mudam de dia. Toque em uma vaga na agenda para encaixar um aluno de escala naquela data.</p><button type="button" class="btn primary" id="scaleAdd">+ Cadastrar aluno de escala</button><div id="scaleStudents" class="list" style="margin-top:14px"></div></section><section id="financeSection" class="panel hidden"><h2 class="section-title">💰 Financeiro mensal</h2><p class="help">Marque o check somente quando o dinheiro entrar. Mensalidades contam uma vez por mês, independentemente da quantidade de aulas.</p><div class="actions"><button type="button" class="btn" id="financePrev">‹</button><strong id="financeMonth"></strong><button type="button" class="btn" id="financeNext">›</button></div><div class="money-grid" style="margin:14px 0"><div class="money-box"><small>Alunos recebidos</small><strong id="receivedStudents">R$ 0,00</strong></div><div class="money-box"><small>Shows + ajuda de custo</small><strong id="receivedShows">R$ 0,00</strong></div><div class="money-box"><small>Total recebido</small><strong id="receivedTotal">R$ 0,00</strong></div></div><p class="help" id="pendingTotal"></p><details id="dueDayPanel" class="dueday-panel"><summary>📅 Datas das mensalidades — consultar por dia</summary><p class="help">Toque no dia para ver os alunos, valores e situação no mês selecionado acima.</p><div id="dueDaySummary"></div></details><h3>Mensalidades — alunos fixos e de escala</h3><div id="studentPayments"></div><h3>Mensalidades em atraso</h3><div id="arrearsPayments"></div><h3>Shows do mês</h3><div id="showPayments"></div></section><section id="tasksSection" class="panel hidden"><h2 class="section-title">☑ Para esta semana</h2><div class="actions" style="margin-bottom:12px"><button type="button" class="btn" id="taskPrev" aria-label="Semana anterior">‹ Semana anterior</button><label style="flex:1;min-width:150px">Escolha uma data da semana<input type="date" id="taskDate"></label><button type="button" class="btn" id="taskNext" aria-label="Próxima semana">Próxima semana ›</button><button type="button" class="btn" id="taskCurrent">Esta semana</button></div><p class="help" id="weekRange"></p><form id="taskForm" class="actions" style="display:flex"><input id="taskInput" maxlength="160" placeholder="Ex.: Preparar repertório, gravar vídeo…" required style="flex:1;min-width:160px"><button class="btn primary" type="submit">+ Tarefa</button></form><div id="taskList" style="margin-top:12px"></div><p class="help">Cada semana tem sua própria lista. Você pode preparar tarefas de semanas futuras e consultar semanas anteriores.</p></section><section class="panel"><div class="line"><span class="status" id="status" aria-live="polite">Modo local: salvo neste navegador; com Supabase: salvo na nuvem.</span></div><p class="help">As aulas fixas se repetem automaticamente toda semana. Shows, reposições e compromissos pessoais são cadastrados por data. Clique em um evento para editar ou excluir.</p></section>
-<footer class="foot">GF Agenda V4.3 • A sincronização requer conectar o projeto e entrar na conta. Enquanto mostrar “Modo local”, os compromissos ficam somente neste dispositivo.</footer>
+<footer class="foot">GF Agenda V4.4 • A sincronização requer conectar o projeto e entrar na conta. Enquanto mostrar “Modo local”, os compromissos ficam somente neste dispositivo.</footer>
 </main>
 <dialog id="modal"><form id="form"><h2 id="modalTitle">Adicionar compromisso</h2><input type="hidden" id="eid"><label>Categoria<select id="type"><option value="aula">Aluno fixo</option><option value="escala">Aluno de escala</option><option value="vaga">Vaga disponível</option><option value="show">Show</option><option value="reposicao">Reposição</option><option value="pessoal">Pessoal</option></select></label><button type="button" class="btn hidden" id="moveFixedClass" style="margin-bottom:10px;background:#25634a">🔄 Trocar aula somente nesta semana</button><button type="button" class="btn hidden" id="useScaleSlot" style="margin-bottom:10px;background:#553574">🟣 Encaixar aluno de escala nesta vaga</button><label id="scaleStudentBox" class="hidden">Selecionar aluno de escala<select id="scaleStudent"><option value="">Selecione um aluno</option></select></label><label id="nameLabel">Nome do aluno / compromisso<input id="name" required maxlength="100" placeholder="Ex.: João / Show em Campinas"></label><div class="two"><label id="dateBox">Data<input type="date" id="date"></label><label id="weekdayBox" class="hidden">Dia da semana<select id="weekday"><option value="0">Domingo</option><option value="1">Segunda-feira</option><option value="2">Terça-feira</option><option value="3">Quarta-feira</option><option value="4">Quinta-feira</option><option value="5">Sexta-feira</option><option value="6">Sábado</option></select></label><label id="timeBox">Horário<input type="time" id="time" required value="14:00"></label></div><div id="swapBox" class="hidden"><label class="checkline"><input type="checkbox" id="swapToggle"> Troca de aula — liberar horário fixo nesta semana</label><div id="swapFields" class="hidden"><label>Aluno com horário fixo<select id="swapStudent"><option value="">Selecione o aluno</option></select></label><p class="help" id="swapHelp">Selecione o aluno para liberar o horário original somente na semana da reposição.</p></div></div><label id="valueBox">Valor (R$)<input type="number" id="value" min="0" max="99999999" step="0.01" inputmode="decimal" placeholder="Ex.: 280,00"></label><label id="dueDayBox" class="hidden">Dia do pagamento da mensalidade<select id="dueDay"><option value="">Não definido</option><option value="5">Dia 5</option><option value="8">Dia 8</option><option value="10">Dia 10</option><option value="15">Dia 15</option><option value="20">Dia 20</option><option value="25">Dia 25</option></select></label><section id="discountBox" class="hidden discount-panel" aria-label="Desconto mensalidade"><div class="discount-heading">💸 DESCONTO NA MENSALIDADE <span class="discount-version">NOVO</span></div><label class="checkline"><input type="checkbox" id="discountToggle"> Aplicar desconto somente em um mês</label><div id="discountFields" class="hidden"><div class="two"><label>Mês do desconto<input type="month" id="discountMonth"></label><label>Valor do desconto (R$)<input type="number" id="discountValue" min="0.01" step="0.01" inputmode="decimal" placeholder="Ex.: 140,00"></label></div><p class="help" id="discountPreview">O desconto altera apenas o mês escolhido. A mensalidade fixa continua igual.</p></div></section><div id="arrearsBox" class="hidden"><label class="checkline"><input type="checkbox" id="arrearsToggle"> Mensalidades em atraso (últimos 4 meses)</label><div id="arrearsFields" class="hidden"><p class="help">Marque os meses que o aluno ainda deve. O valor é calculado automaticamente com base na mensalidade cadastrada. Cada mês pode ser marcado como recebido no Financeiro.</p><div id="arrearsMonths"></div><div class="payrow"><strong>Total em atraso selecionado</strong><strong id="arrearsTotal">R$ 0,00</strong></div></div></div><div id="costBox" class="hidden"><label class="checkline"><input type="checkbox" id="costToggle"> Ajuda de custo</label><label id="costFields" class="hidden">Valor da ajuda de custo (R$)<input type="number" id="costValue" min="0" step="0.01" inputmode="decimal" placeholder="Ex.: 80,00"></label></div><label>Observações (opcional)<textarea id="notes" maxlength="500" placeholder="Local, duração, telefone, detalhes..."></textarea></label><div class="actions"><button type="button" class="btn hidden" id="cancellationOpen" style="background:#cf39ad;color:white;font-weight:800">✖ Aula Cancelada</button><button type="button" class="btn hidden" id="absenceOpen" style="background:#ff9c36;color:#1f1309;font-weight:800">⚠ Registrar falta</button><button type="submit" class="btn primary">Salvar</button><button type="button" class="btn" id="cancel">Cancelar</button><button type="button" class="btn danger hidden" id="delete">Excluir</button></div></form></dialog>
 <dialog id="absenceModal"><form id="absenceForm"><h2 id="absenceTitle">Registrar falta</h2><p class="help" id="absenceStudentLabel"></p><div class="absence-panel"><label>Data da falta (dia da aula fixa)<input id="absenceDate" type="date" required></label><p id="absenceExplanation">Apenas esta ocorrência será liberada. O cadastro fixo permanece.</p>
@@ -502,7 +519,67 @@ let sb=null,cloudUser=null, recoveryMode=false, authListener=null;
 const localSnapshot=()=>{try{const a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a.filter(valid):[];}catch{return [];}};
 function cloudMessage(t){by('cloudMessage').textContent=t;}
 function cloudUI(){by('syncstate').textContent=cloudUser?'☁ Sincronizado: '+cloudUser.email:(sb?'☁ Projeto configurado • faça login para sincronizar':'Modo local • sem sincronização');by('cloudRefresh').classList.toggle('hidden',!cloudUser);by('cloudLogout').classList.toggle('hidden',!cloudUser);by('cloudMigrate').classList.toggle('hidden',!cloudUser||!localSnapshot().length);by('forgotPassword').textContent=cloudUser?'Alterar senha':'Esqueci minha senha';}
-async function cloudConnect(silent=false){
+
+// GF Agenda V4.4 — Web Push: cada dispositivo cadastra sua própria assinatura.
+const PUSH_VAPID_PUBLIC_KEY='SUBSTITUIR_PELA_CHAVE_PUBLICA_VAPID';
+const pushStatus=message=>{by('pushStatus').textContent=message;};
+const pushAvailable=()=>('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window)&&window.isSecureContext;
+function vapidBytes(base64){
+ const pad='='.repeat((4-base64.length%4)%4),raw=atob((base64+pad).replace(/-/g,'+').replace(/_/g,'/'));
+ return Uint8Array.from(raw,c=>c.charCodeAt(0));
+}
+function dailyPreview(){
+ const d=new Date(),day=iso(d.getFullYear(),d.getMonth(),d.getDate());
+ const personal=events.filter(e=>e.type==='pessoal'&&e.date===day).sort((a,b)=>a.time.localeCompare(b.time));
+ const makeup=events.filter(e=>e.type==='reposicao'&&e.date===day).sort((a,b)=>a.time.localeCompare(b.time));
+ const materials=events.filter(e=>e.type==='cancelada'&&e.sendMaterial&&!e.materialSent&&e.date<=day);
+ if(!personal.length&&!makeup.length&&!materials.length)return '✓ Nada para avisar hoje.';
+ const lines=['GF Agenda • '+new Date(day+'T12:00:00').toLocaleDateString('pt-BR')];
+ if(personal.length)lines.push('\n📅 Compromissos pessoais',...personal.map(e=>(e.time||'--:--')+' — '+e.name));
+ if(makeup.length)lines.push('\n🟢 Reposições',...makeup.map(e=>(e.time||'--:--')+' — '+e.name));
+ if(materials.length)lines.push('\n📹 Materiais pendentes',...materials.map(e=>{const student=events.find(x=>x.id===e.studentId);return (student?.name||e.name||'Aluno')+' ('+e.date+')';}));
+ return lines.join('\n');
+}
+async function pushRegistration(){
+ if(!pushAvailable())throw Error('Notificações Web Push indisponíveis neste navegador. Abra o GF Agenda pela Tela de Início do iPhone/iPad.');
+ return await navigator.serviceWorker.register('./sw.js',{scope:'./'});
+}
+async function pushEnable(){
+ const btn=by('pushEnable');btn.disabled=true;pushStatus('Preparando notificações…');
+ try{
+  if(!cloudUser||!sb)throw Error('Entre primeiro na sua conta Supabase para sincronizar as notificações dos aparelhos.');
+  if(!/^[A-Za-z0-9_-]{80,100}$/.test(PUSH_VAPID_PUBLIC_KEY))throw Error('Falta configurar a chave pública VAPID no index.html (veja o guia de instalação).');
+  const reg=await pushRegistration();
+  const permission=await Notification.requestPermission();
+  if(permission!=='granted')throw Error('Permissão negada. Autorize notificações nos Ajustes do iPhone/iPad.');
+  let sub=await reg.pushManager.getSubscription();
+  if(sub){try{const old=await sub.toJSON();if(!old.keys?.p256dh)sub=null;}catch{sub=null;}}
+  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(PUSH_VAPID_PUBLIC_KEY)});
+  const json=sub.toJSON();
+  const {error}=await sb.from('gf_push_subscriptions').upsert({user_id:cloudUser.id,endpoint:json.endpoint,p256dh:json.keys.p256dh,auth:json.keys.auth,user_agent:navigator.userAgent,enabled:true,updated_at:new Date().toISOString()},{onConflict:'endpoint'});
+  if(error)throw error;
+  pushStatus('✓ Notificações ativadas neste aparelho. O envio às 6h depende do agendamento no Supabase.');
+ }catch(e){pushStatus('⚠ '+e.message);}finally{btn.disabled=false;}
+}
+async function pushDisable(){
+ const btn=by('pushDisable');btn.disabled=true;
+ try{
+  const reg=await navigator.serviceWorker.getRegistration('./');
+  const sub=reg?await reg.pushManager.getSubscription():null;
+  if(sub){
+   if(sb&&cloudUser){const {error}=await sb.from('gf_push_subscriptions').delete().eq('user_id',cloudUser.id).eq('endpoint',sub.endpoint);if(error)throw error;}
+   await sub.unsubscribe();
+  }
+  pushStatus('Notificações desativadas neste aparelho.');
+ }catch(e){pushStatus('⚠ '+e.message);}finally{btn.disabled=false;}
+}
+by('pushEnable').addEventListener('click',pushEnable);
+by('pushDisable').addEventListener('click',pushDisable);
+by('pushPreview').addEventListener('click',()=>{const el=by('pushPreviewBox');el.textContent=dailyPreview();el.classList.toggle('hidden',false);});
+if(!pushAvailable())pushStatus('Este navegador não oferece Web Push. No iPhone/iPad, use o app adicionado à Tela de Início, com iOS/iPadOS 16.4 ou posterior.');
+else pushStatus('Pronto para configurar. Entre na conta Supabase e toque em Ativar neste aparelho.');
+
+ async function cloudConnect(silent=false){
  const button=by('cloudConnect');const feedback=by('connectFeedback');
  const url=by('cloudUrl').value.trim(),key=by('cloudKey').value.trim();
  if(!silent){feedback.textContent='⏳ Verificando…';cloudMessage('Verificando conexão…');button.disabled=true;}
