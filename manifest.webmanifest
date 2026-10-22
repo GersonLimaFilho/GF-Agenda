@@ -1,0 +1,11 @@
+{
+  "name": "GF Agenda",
+  "short_name": "GF Agenda",
+  "id": "/GF-Agenda/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c0e12",
+  "theme_color": "#0c0e12",
+  "icons": [{"src":"./apple-touch-icon.png","sizes":"180x180","type":"image/png","purpose":"any"}]
+}
