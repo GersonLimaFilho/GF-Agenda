@@ -33,6 +33,17 @@
 .material-collapse[open] .material-collapse-chevron{transform:rotate(180deg)}
 .material-collapse-body{padding:0 15px 15px}
 .material-collapse-summary:focus-visible{outline:2px solid #ffbc4d;outline-offset:-3px}
+
+/* GF Agenda V4.4.2 — notificações recolhidas por padrão */
+.push-panel{padding:0!important;overflow:hidden}
+.push-collapse-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;cursor:pointer;list-style:none;min-height:62px}
+.push-collapse-summary::-webkit-details-marker{display:none}
+.push-collapse-summary::marker{content:""}
+.push-collapse-title{font-size:clamp(16px,3.8vw,20px);font-weight:800;line-height:1.4}
+.push-collapse-chevron{font-size:27px;color:#57ce94;line-height:1;transition:transform .2s}
+.push-collapse[open] .push-collapse-chevron{transform:rotate(180deg)}
+.push-collapse-body{padding:0 15px 15px}
+.push-collapse-summary:focus-visible{outline:2px solid #57ce94;outline-offset:-3px}
 </style>
 </head>
 <body><main class="wrap">
@@ -44,13 +55,16 @@
 <p class="help" id="materialWeekRange"></p><div id="materialReminderList"></div>
 <p class="help" id="materialReminderHelp">Materiais de semanas anteriores continuam pendentes até você marcar como enviados.</p>
 </div></details></section>
-<section class="panel push-panel" id="pushPanel">
-<h2>🔔 Notificações diárias — 6h</h2>
+<section class="panel push-panel" id="pushPanel" aria-label="Notificações diárias — 6h">
+<details class="push-collapse" id="pushCollapse">
+<summary class="push-collapse-summary"><span class="push-collapse-title">🔔 Notificação diária — 6h</span><span class="push-collapse-chevron" aria-hidden="true">⌄</span></summary>
+<div class="push-collapse-body">
 <p class="help">Receba um resumo somente quando houver compromissos pessoais ou reposições do dia, ou materiais pendentes. As aulas fixas normais não entram no aviso. Ative separadamente no iPhone e no iPad, abrindo o GF Agenda pela Tela de Início.</p>
 <div class="push-controls"><button type="button" class="btn primary" id="pushEnable">Ativar neste aparelho</button><button type="button" class="btn" id="pushDisable">Desativar neste aparelho</button><button type="button" class="btn" id="pushPreview">Ver resumo de hoje</button></div>
 <p class="help" id="pushStatus" aria-live="polite">Verificando disponibilidade de notificações…</p>
 <div id="pushPreviewBox" class="push-preview hidden"></div>
 <p class="help">O envio às 6h exige configurar o agendamento no Supabase. Ativar neste aparelho não inicia sozinho o envio automático.</p>
+</div></details>
 </section>
 <div id="agendaSection"><section class="panel"><div class="toolbar"><div class="nav"><button type="button" class="btn" id="prev" aria-label="Mês anterior">‹</button><h2 id="title">Calendário</h2><button type="button" class="btn" id="next" aria-label="Próximo mês">›</button><button type="button" class="btn" id="today">Hoje</button></div><div class="views"><button type="button" class="btn" data-view="month" aria-pressed="false">Mês</button><button type="button" class="btn" data-view="week" aria-pressed="false">Semana</button><button type="button" class="btn" data-view="list" aria-pressed="true">Lista</button></div></div></section>
 <section id="monthView" class="panel"><div class="weekhead"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div class="month" id="calendar"></div></section>
