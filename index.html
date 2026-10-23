@@ -56,6 +56,25 @@
 .listday-collapsible[open]>.listday-summary .listday-chevron{transform:rotate(180deg)}
 .listday-collapsible>.items{padding:10px}
 .listday-summary:focus-visible{outline:2px solid #ff9ea1;outline-offset:-3px}
+
+/* GF Agenda — painel de disponibilidade semanal */
+.free-week-panel{border-color:#4b735e;background:linear-gradient(130deg,rgba(45,130,87,.13),#181b22)}
+.free-week-panel>summary{cursor:pointer;font-weight:850;font-size:17px;list-style:none;padding:3px 0}
+.free-week-panel>summary::-webkit-details-marker{display:none}
+.free-week-body{padding-top:13px}
+.free-week-nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.free-week-nav strong{flex:1;min-width:185px;text-align:center}
+.free-week-total{padding:11px;background:#10261c;border:1px solid #367854;border-radius:10px;margin:10px 0;font-weight:800;color:#bdf5d1}
+.free-week-day{border:1px solid var(--line);border-radius:11px;margin:9px 0;overflow:hidden}
+.free-week-day>summary{cursor:pointer;list-style:none;padding:12px;background:#202630;font-weight:800;display:flex;justify-content:space-between;gap:10px}
+.free-week-day>summary::-webkit-details-marker{display:none}
+.free-week-slots{padding:9px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:7px}
+.free-week-slot{padding:10px;text-align:left;border:1px solid #3a4d42;border-radius:9px;color:#fff;background:#25392f}
+.free-week-slot.vaga{border-left:4px solid #e5484d;background:#42262a}
+.free-week-slot.falta{border-left:4px solid #ff9c36;background:#4b331f}
+.free-week-slot.cancelada{border-left:4px solid #f767d7;background:#45253f}
+.free-week-slot.livre-reposicao{border-left:4px solid #39d987;background:#1b4530}
+.free-week-slot small{display:block;margin-top:3px;color:#d1d4d9}
 </style>
 </head>
 <body><main class="wrap">
@@ -79,6 +98,10 @@
 </div></details>
 </section>
 <div id="agendaSection"><section class="panel"><div class="toolbar"><div class="nav"><button type="button" class="btn" id="prev" aria-label="Mês anterior">‹</button><h2 id="title">Calendário</h2><button type="button" class="btn" id="next" aria-label="Próximo mês">›</button><button type="button" class="btn" id="today">Hoje</button></div><div class="views"><button type="button" class="btn" data-view="month" aria-pressed="false">Mês</button><button type="button" class="btn" data-view="week" aria-pressed="false">Semana</button><button type="button" class="btn" data-view="list" aria-pressed="true">Lista</button></div></div></section>
+<details class="panel free-week-panel" id="freeWeekPanel"><summary>📋 Horários livres da semana ▾</summary>
+<div class="free-week-body"><p class="help">Vagas fixas, faltas registradas, aulas canceladas e horários liberados para reposição. Horários já ocupados por encaixes não aparecem.</p>
+<div class="free-week-nav"><button type="button" class="btn" id="freeWeekPrev">‹ Anterior</button><strong id="freeWeekRange"></strong><button type="button" class="btn" id="freeWeekNext">Próxima ›</button><button type="button" class="btn" id="freeWeekToday">Esta semana</button></div>
+<div class="free-week-total" id="freeWeekTotal"></div><div id="freeWeekDays"></div></div></details>
 <section id="monthView" class="panel"><div class="weekhead"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div class="month" id="calendar"></div></section>
 <section id="listView" class="panel hidden"><div class="list" id="list"></div></section>
 </div><section id="scaleSection" class="panel hidden"><h2 class="section-title">🟣 Alunos de escala</h2><p class="help">Cadastro sem horário fixo. O pagamento mensal continua normalmente, mesmo quando as aulas mudam de dia. Toque em uma vaga na agenda para encaixar um aluno de escala naquela data.</p><button type="button" class="btn primary" id="scaleAdd">+ Cadastrar aluno de escala</button><div id="scaleStudents" class="list" style="margin-top:14px"></div></section><section id="financeSection" class="panel hidden"><h2 class="section-title">💰 Financeiro mensal</h2><p class="help">Marque o check somente quando o dinheiro entrar. Mensalidades contam uma vez por mês, independentemente da quantidade de aulas.</p><div class="actions"><button type="button" class="btn" id="financePrev">‹</button><strong id="financeMonth"></strong><button type="button" class="btn" id="financeNext">›</button></div><div class="money-grid" style="margin:14px 0"><div class="money-box"><small>Alunos recebidos</small><strong id="receivedStudents">R$ 0,00</strong></div><div class="money-box"><small>Shows + ajuda de custo</small><strong id="receivedShows">R$ 0,00</strong></div><div class="money-box"><small>Total recebido</small><strong id="receivedTotal">R$ 0,00</strong></div></div><p class="help" id="pendingTotal"></p><details id="dueDayPanel" class="dueday-panel"><summary>📅 Datas das mensalidades — consultar por dia</summary><p class="help">Toque no dia para ver os alunos, valores e situação no mês selecionado acima.</p><div id="dueDaySummary"></div></details><h3>Mensalidades — alunos fixos e de escala</h3><div id="studentPayments"></div><h3>Mensalidades em atraso</h3><div id="arrearsPayments"></div><h3>Shows do mês</h3><div id="showPayments"></div></section><section id="tasksSection" class="panel hidden"><h2 class="section-title">☑ Para esta semana</h2><div class="actions" style="margin-bottom:12px"><button type="button" class="btn" id="taskPrev" aria-label="Semana anterior">‹ Semana anterior</button><label style="flex:1;min-width:150px">Escolha uma data da semana<input type="date" id="taskDate"></label><button type="button" class="btn" id="taskNext" aria-label="Próxima semana">Próxima semana ›</button><button type="button" class="btn" id="taskCurrent">Esta semana</button></div><p class="help" id="weekRange"></p><form id="taskForm" class="actions" style="display:flex"><input id="taskInput" maxlength="160" placeholder="Ex.: Preparar repertório, gravar vídeo…" required style="flex:1;min-width:160px"><button class="btn primary" type="submit">+ Tarefa</button></form><div id="taskList" style="margin-top:12px"></div><p class="help">Cada semana tem sua própria lista. Você pode preparar tarefas de semanas futuras e consultar semanas anteriores.</p></section><section class="panel"><div class="line"><span class="status" id="status" aria-live="polite">Modo local: salvo neste navegador; com Supabase: salvo na nuvem.</span></div><p class="help">As aulas fixas se repetem automaticamente toda semana. Shows, reposições e compromissos pessoais são cadastrados por data. Clique em um evento para editar ou excluir.</p></section>
@@ -155,7 +178,47 @@ function forDay(date){
 }
 function make(tag,cls,txt){const el=document.createElement(tag);if(cls)el.className=cls;if(txt!==undefined)el.textContent=txt;return el;}
 const expandedAgendaDays=new Set();
-function render(){renderFinance();renderTasks();renderScaleStudents();renderMaterials();by('title').textContent=new Date(year,month,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+// Relatório de disponibilidade: usa a mesma lógica da agenda, sem gravar dados.
+let freeWeekDate=weekStart(new Date());
+function renderFreeWeek(){
+ const base=parseDate(freeWeekDate);if(!base)return;
+ const last=new Date(base.getFullYear(),base.getMonth(),base.getDate()+5);
+ by('freeWeekRange').textContent=base.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' a '+last.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+ const root=by('freeWeekDays');root.replaceChildren();let total=0;
+ const names={vaga:'🔴 Vaga fixa',falta:'🟠 Falta registrada',cancelada:'🩷 Aula cancelada','livre-reposicao':'🟢 Liberado para reposição'};
+ for(let i=0;i<6;i++){
+  const d=new Date(base.getFullYear(),base.getMonth(),base.getDate()+i),key=iso(d.getFullYear(),d.getMonth(),d.getDate());
+  const oldFilter=filter;let all=[];
+  try{filter='aula';all=forDay(d);}finally{filter=oldFilter;}
+  const busy=new Set(events.filter(e=>e.date===key&&['pessoal','show'].includes(e.type)&&e.time).map(e=>e.time));
+  const free=all.filter(e=>Object.hasOwn(names,e.type)&&!busy.has(e.time));
+  total+=free.length;
+  const day=make('details','free-week-day');day.open=i===0;
+  day.append(make('summary','',d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+' — '+free.length+' livre'+(free.length===1?'':'s')));
+  const slots=make('div','free-week-slots');
+  if(!free.length)slots.append(make('p','help','Nenhum horário livre neste dia.'));
+  for(const e of free){
+   const btn=make('button','free-week-slot '+e.type);btn.type='button';
+   btn.append(make('strong','',e.time+' · '+names[e.type]));
+   if(e.type!=='vaga'){
+    const student=events.find(x=>x.id===e.studentId);
+    if(student)btn.append(make('small','',student.name));
+   }
+   btn.addEventListener('click',()=>{
+    if(['falta','cancelada'].includes(e.type))openAbsence(e.studentId,key,e.type);
+    else openEdit(e,d);
+   });
+   slots.append(btn);
+  }
+  day.append(slots);root.append(day);
+ }
+ by('freeWeekTotal').textContent='Total: '+total+' horário'+(total===1?'':'s')+' livre'+(total===1?'':'s')+' nesta semana';
+}
+function shiftFreeWeek(days){const d=parseDate(freeWeekDate);d.setDate(d.getDate()+days);freeWeekDate=weekStart(d);renderFreeWeek();}
+by('freeWeekPrev').addEventListener('click',()=>shiftFreeWeek(-7));
+by('freeWeekNext').addEventListener('click',()=>shiftFreeWeek(7));
+by('freeWeekToday').addEventListener('click',()=>{freeWeekDate=weekStart(new Date());renderFreeWeek();});
+function render(){renderFreeWeek();renderFinance();renderTasks();renderScaleStudents();renderMaterials();by('title').textContent=new Date(year,month,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
  if(filter==='aula'&&view==='list'){const base=new Date(year,month,selectedDay);base.setDate(base.getDate()-(base.getDay()+6)%7);const end=new Date(base);end.setDate(end.getDate()+6);by('title').textContent='Semana '+base.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' – '+end.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});}document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===view)));by('monthView').classList.toggle('hidden',view!=='month'&&view!=='week');by('listView').classList.toggle('hidden',view!=='list');const start=new Date(year,month,1),count=new Date(year,month+1,0).getDate();if(view==='month'||view==='week'){const cal=by('calendar');cal.replaceChildren();const reference=new Date(year,month,Math.min(selectedDay,new Date(year,month+1,0).getDate()));const base=view==='week'?new Date(year,month,reference.getDate()-reference.getDay()):new Date(year,month,1-start.getDay());const cells=view==='week'?7:Math.ceil((start.getDay()+count)/7)*7;for(let i=0;i<cells;i++){const d=new Date(base.getFullYear(),base.getMonth(),base.getDate()+i),other=d.getMonth()!==month;const cell=make('div','day'+(other?' other':'')+(iso(d.getFullYear(),d.getMonth(),d.getDate())===dateToday?' today':''));const top=make('div','date');top.append(make('strong','',String(d.getDate())));const add=make('button','plus','+');add.type='button';if(d.getDay()===0&&['aula','reposicao'].includes(filter)){add.disabled=true;add.title='Domingo fechado para aulas';}add.title='Adicionar nesta data';add.setAttribute('aria-label','Adicionar em '+d.toLocaleDateString('pt-BR'));add.addEventListener('click',()=>openEdit(null,d));top.append(add);cell.append(top);for(const e of forDay(d)){if(e.type==='almoco')continue;const b=make('button','entry '+e.type);b.type='button';b.append(make('span','time',e.time+' '));b.append(document.createTextNode(e.type==='vaga'?'VAGA':e.name));b.addEventListener('click',()=>['falta','cancelada'].includes(e.type)?openAbsence(e.studentId,e.date,e.type):openEdit(e,d));cell.append(b);}cal.append(cell);}}else{const list=by('list');list.replaceChildren();let any=false;const days=filter==='aula'?(()=>{const base=new Date(year,month,selectedDay);base.setDate(base.getDate()-(base.getDay()+6)%7);return Array.from({length:7},(_,i)=>new Date(base.getFullYear(),base.getMonth(),base.getDate()+i));})():Array.from({length:count},(_,i)=>new Date(year,month,i+1));for(const d of days){const all=forDay(d);if(!all.length&&!(filter==='aula'&&d.getDay()===0))continue;any=true;const dayKey=iso(d.getFullYear(),d.getMonth(),d.getDate());const row=make('details','listday listday-collapsible');row.open=expandedAgendaDays.has(dayKey);row.addEventListener('toggle',()=>{if(row.open)expandedAgendaDays.add(dayKey);else expandedAgendaDays.delete(dayKey);});const summary=make('summary','listday-summary');summary.append(make('strong','',d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})));summary.append(make('span','listday-chevron','⌄'));row.append(summary);const items=make('div','items');if(filter==='aula'&&d.getDay()===0)items.append(make('div','sunday-closed','🔒 Domingo sem aulas — disponível para shows.'));for(const e of all){const b=make('button','row '+e.type);b.type='button';if(e.type==='almoco'){b.textContent='12:00 · ALMOÇO';b.disabled=true;items.append(b);continue;}const badge=make('span','badge '+e.type,labels[e.type]);b.append(badge,document.createTextNode(e.time+' · '+(e.type==='vaga'?'VAGA':e.name)));if(e.notes)b.append(make('small','',e.notes));b.addEventListener('click',()=>['falta','cancelada'].includes(e.type)?openAbsence(e.studentId,e.date,e.type):openEdit(e,d));items.append(b);}row.append(items);list.append(row);}if(!any)list.append(make('p','muted','Nenhum compromisso nesta categoria neste mês. Use “+ Adicionar” para cadastrar.'));}}
 by('useScaleSlot').addEventListener('click',()=>{enableScaleBooking();adjustForm();by('useScaleSlot').classList.add('hidden');by('modalTitle').textContent='Encaixar aluno de escala nesta vaga';});
 function refreshScaleOptions(){
