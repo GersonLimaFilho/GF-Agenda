@@ -75,8 +75,7 @@
 .free-week-slot.cancelada{border-left:4px solid #f767d7;background:#45253f}
 .free-week-slot.livre-reposicao{border-left:4px solid #39d987;background:#1b4530}
 .free-week-slot small{display:block;margin-top:3px;color:#d1d4d9}
-/* GF Agenda: ocultar painel de notificações diárias, mantendo recursos para futura reativação */
-#pushPanel{display:none!important}
+/* GF Agenda: painel de ativação de notificações reativado */
 
 /* GF Agenda — área de trabalhos */
 .work-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
@@ -145,7 +144,7 @@
 <div class="push-controls"><button type="button" class="btn primary" id="pushEnable">Ativar neste aparelho</button><button type="button" class="btn" id="pushDisable">Desativar neste aparelho</button><button type="button" class="btn" id="pushPreview">Ver resumo de hoje</button></div>
 <p class="help" id="pushStatus" aria-live="polite">Verificando disponibilidade de notificações…</p>
 <div id="pushPreviewBox" class="push-preview hidden"></div>
-<p class="help">O envio às 6h exige configurar o agendamento no Supabase. Ativar neste aparelho não inicia sozinho o envio automático.</p>
+<p class="help">O envio automático às 7h30 depende do agendamento no Supabase. Ative as notificações separadamente em cada aparelho.</p>
 </div></details>
 </section>
 <div id="agendaSection"><section class="panel"><div class="toolbar"><div class="nav"><button type="button" class="btn" id="prev" aria-label="Mês anterior">‹</button><h2 id="title">Calendário</h2><button type="button" class="btn" id="next" aria-label="Próximo mês">›</button><button type="button" class="btn" id="today">Hoje</button></div><div class="views"><button type="button" class="btn" data-view="month" aria-pressed="false">Mês</button><button type="button" class="btn" data-view="week" aria-pressed="false">Semana</button><button type="button" class="btn" data-view="list" aria-pressed="true">Lista</button></div></div></section>
