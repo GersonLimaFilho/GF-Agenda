@@ -141,7 +141,7 @@
 <summary class="push-collapse-summary"><span class="push-collapse-title">🔔 Notificação diária — 7h30</span><span class="push-collapse-chevron" aria-hidden="true">⌄</span></summary>
 <div class="push-collapse-body">
 <p class="help">Receba um resumo somente quando houver compromissos pessoais ou reposições do dia, ou materiais pendentes. As aulas fixas normais não entram no aviso. Ative separadamente no iPhone e no iPad, abrindo o GF Agenda pela Tela de Início.</p>
-<div class="push-controls"><button type="button" class="btn primary" id="pushEnable">Ativar neste aparelho</button><button type="button" class="btn" id="pushDisable">Desativar neste aparelho</button><button type="button" class="btn" id="pushPreview">Ver resumo de hoje</button></div>
+<div class="push-controls"><button type="button" class="btn primary" id="pushEnable">Ativar / renovar neste aparelho</button><button type="button" class="btn" id="pushDisable">Desativar neste aparelho</button><button type="button" class="btn" id="pushPreview">Ver resumo de hoje</button></div>
 <p class="help" id="pushStatus" aria-live="polite">Verificando disponibilidade de notificações…</p>
 <div id="pushPreviewBox" class="push-preview hidden"></div>
 <p class="help">O envio automático às 7h30 depende do agendamento no Supabase. Ative as notificações separadamente em cada aparelho.</p>
@@ -907,7 +907,7 @@ function cloudMessage(t){by('cloudMessage').textContent=t;}
 function cloudUI(){by('syncstate').textContent=cloudUser?'☁ Sincronizado: '+cloudUser.email:(sb?'☁ Projeto configurado • faça login para sincronizar':'Modo local • sem sincronização');by('cloudRefresh').classList.toggle('hidden',!cloudUser);by('cloudLogout').classList.toggle('hidden',!cloudUser);by('cloudMigrate').classList.toggle('hidden',!cloudUser||!localSnapshot().length);by('forgotPassword').textContent=cloudUser?'Alterar senha':'Esqueci minha senha';}
 
 // GF Agenda V4.4 — Web Push: cada dispositivo cadastra sua própria assinatura.
-const PUSH_VAPID_PUBLIC_KEY='BHIYTrMRZ4nkg5AZsIVvCoB0MOKYJLchGr2JyyPGCppJk6gh9q6EDyrBGt3Uh4jOZq7wMME-iNL9o03nlw2tswg';
+const PUSH_VAPID_PUBLIC_KEY='BCVaCkw6iSXUydsIOKVZJMaavmYunkKP2Wjz76Y2uZFOZb53nwBKLAtsucjERI2FjW7HS-g4ghbzp7uHSvFXI2E';
 const pushStatus=message=>{by('pushStatus').textContent=message;};
 const pushAvailable=()=>('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window)&&window.isSecureContext;
 function vapidBytes(base64){
@@ -938,13 +938,22 @@ async function pushEnable(){
   const reg=await pushRegistration();
   const permission=await Notification.requestPermission();
   if(permission!=='granted')throw Error('Permissão negada. Autorize notificações nos Ajustes do iPhone/iPad.');
+  // O aparelho pode conservar uma inscrição vinculada à chave VAPID anterior.
+  // Renovamos a inscrição ao tocar em Ativar para usar o novo par VAPID.
   let sub=await reg.pushManager.getSubscription();
-  if(sub){try{const old=await sub.toJSON();if(!old.keys?.p256dh)sub=null;}catch{sub=null;}}
-  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(PUSH_VAPID_PUBLIC_KEY)});
+  if(sub){
+   pushStatus('Renovando a inscrição anterior neste aparelho…');
+   // Remove o endpoint antigo do banco para não tentar enviar para uma inscrição inválida.
+   const {error:oldError}=await sb.from('gf_push_subscriptions').delete().eq('user_id',cloudUser.id).eq('endpoint',sub.endpoint);
+   if(oldError)throw oldError;
+   const removed=await sub.unsubscribe();
+   if(!removed)throw Error('Não foi possível renovar a inscrição antiga. Tente desativar e ativar as notificações.');
+  }
+  sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(PUSH_VAPID_PUBLIC_KEY)});
   const json=sub.toJSON();
   const {error}=await sb.from('gf_push_subscriptions').upsert({user_id:cloudUser.id,endpoint:json.endpoint,p256dh:json.keys.p256dh,auth:json.keys.auth,user_agent:navigator.userAgent,enabled:true,updated_at:new Date().toISOString()},{onConflict:'endpoint'});
   if(error)throw error;
-  pushStatus('✓ Notificações ativadas neste aparelho. O envio às 7h30 depende do agendamento no Supabase.');
+  pushStatus('✓ Inscrição renovada com sucesso neste aparelho. O envio às 7h30 depende do agendamento no Supabase.');
  }catch(e){pushStatus('⚠ '+e.message);}finally{btn.disabled=false;}
 }
 async function pushDisable(){
