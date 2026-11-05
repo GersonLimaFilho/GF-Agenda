@@ -436,30 +436,25 @@ function refreshSwapStudents(){
 // A semana é escolhida explicitamente para não buscar por engano em outro mês.
 // Calcula a ocupação real de cada horário após cancelamentos e remanejamentos.
 function swapAvailableSlots(day, excludeId=''){
- const dateKey=iso(day.getFullYear(),day.getMonth(),day.getDate()), weekday=day.getDay();
- if(weekday===0)return [];
- const fixed=events.filter(e=>e.type==='aula'&&e.weekday===weekday);
- const booked=events.filter(e=>e.id!==excludeId&&e.date===dateKey&&['reposicao','escala-aula','show','pessoal'].includes(e.type));
- const occupied=new Set(booked.map(e=>e.time));
- const results=new Map();
- // Também considera horários liberados por faltas/cancelamentos ou troca de aluno fixo.
- for(const student of fixed){
-  const freed=events.find(e=>['cancelada','falta'].includes(e.type)&&e.studentId===student.id&&e.date===dateKey);
-  const swapped=releasedStudentOnDate(student,day);
-  if(freed||swapped){
-   if(!occupied.has(student.time))results.set(student.time,{time:student.time,kind:freed?(freed.type==='cancelada'?'Cancelamento de '+student.name:'Falta de '+student.name):'Troca de '+student.name});
-  }else occupied.add(student.time);
+ // Usa a MESMA grade que mostra o horário verde "LIVRE PARA REPOSIÇÃO".
+ // Evita divergência entre o calendário e o seletor de trocas.
+ if(!day||day.getDay()===0)return [];
+ const key=iso(day.getFullYear(),day.getMonth(),day.getDate());
+ const oldFilter=filter;
+ let list=[];
+ try{filter='aula';list=forDay(day);}finally{filter=oldFilter;}
+ const allowed=new Set(['vaga','livre-reposicao','cancelada','falta']);
+ const occupied=new Set(events.filter(e=>e.id!==excludeId&&e.date===key&&
+   ['reposicao','escala-aula','show','pessoal'].includes(e.type)).map(e=>e.time));
+ const slots=new Map();
+ for(const item of list){
+  if(!allowed.has(item.type)||occupied.has(item.time))continue;
+  let kind=item.type==='vaga'?'Vaga':item.type==='livre-reposicao'?'Livre para reposição (troca de aluno)':
+    item.type==='cancelada'?'Liberado por cancelamento':'Liberado por falta';
+  if(item.type==='livre-reposicao'&&item.notes)kind=item.notes;
+  slots.set(item.time,{time:item.time,kind});
  }
- const hours=weekday===6?Array.from({length:8},(_,i)=>i+7):[...Array.from({length:5},(_,i)=>i+7),...Array.from({length:10},(_,i)=>i+13)];
- for(const hour of hours){
-  const time=String(hour).padStart(2,'0')+':00';
-  if(!occupied.has(time)&&!results.has(time))results.set(time,{time,kind:'Vaga'});
- }
- // Caso haja cancelamento em um horário que não está na grade normal.
- for(const e of events.filter(e=>['cancelada','falta'].includes(e.type)&&e.date===dateKey)){
-  if(!occupied.has(e.time)&&!results.has(e.time))results.set(e.time,{time:e.time,kind:'Liberado por '+(e.type==='cancelada'?'cancelamento':'falta')});
- }
- return [...results.values()].filter(x=>!occupied.has(x.time)).sort((a,b)=>a.time.localeCompare(b.time));
+ return [...slots.values()].sort((a,b)=>a.time.localeCompare(b.time));
 }
 function refreshSwapVacancies(){
  const select=by('swapVacancy');if(!select)return;
@@ -810,7 +805,7 @@ by('moveFixedClass').addEventListener('click',()=>{
  adjustForm();updateSwapHelp();refreshSwapVacancies();
 });by('discountMonth').addEventListener('change',loadDiscountMonth);by('discountToggle').addEventListener('change',refreshDiscount);by('discountValue').addEventListener('input',refreshDiscount);by('value').addEventListener('input',refreshDiscount);by('arrearsToggle').addEventListener('change',updateExtraFields);
  by('swapToggle').addEventListener('change',updateExtraFields);
- by('swapStudent').addEventListener('change',()=>{const student=events.find(e=>e.type==='aula'&&e.id===by('swapStudent').value);if(student)by('name').value=student.name;updateSwapHelp();});
+ by('swapStudent').addEventListener('change',()=>{const student=events.find(e=>e.type==='aula'&&e.id===by('swapStudent').value);if(student)by('name').value=student.name;updateSwapHelp();refreshSwapVacancies();});
  by('date').addEventListener('change',updateSwapHelp);by('value').addEventListener('input',updateArrearsTotal);by('costToggle').addEventListener('change',updateExtraFields);by('new').addEventListener('click',()=>openEdit(null,new Date(year,month,Math.min(now.getDate(),new Date(year,month+1,0).getDate()))));by('cancel').addEventListener('click',()=>by('modal').close());
 function nextFixedDate(student,reference){
  const origin=parseDate(reference)||new Date();const day=new Date(origin.getFullYear(),origin.getMonth(),origin.getDate());
