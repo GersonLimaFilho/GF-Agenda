@@ -504,14 +504,16 @@ function enableScaleBooking(){
  }
  select.value='escala-aula';
 }
-function openEdit(e=null,d=new Date(year,month,1)){
+function openEdit(e=null,d=new Date(year,month,selectedDay)){
  by('form').reset();by('form').dataset.originalStudentId=e?.type==='aula'?e.id:'';by('moveFixedClass').classList.toggle('hidden',e?.type!=='aula');by('useScaleSlot').classList.toggle('hidden',!['vaga','livre-reposicao','falta','cancelada'].includes(e?.type));
  by('eid').value=e?.virtual?'':(e?.id||'');
  by('modalTitle').textContent=e?.type==='escala'?'Editar aluno de escala':e?.type==='livre-reposicao'?'Agendar reposição no horário liberado':e?.type==='vaga'?'Preencher vaga com aluno':(e?'Editar compromisso':'Adicionar compromisso');
  by('type').value=['falta','cancelada'].includes(e?.type)?'reposicao':e?.type==='livre-reposicao'?'reposicao':(e?.type==='vaga'?'aula':(e?.type==='escala-aula'?'escala':(e?.type||filter)));if(e?.type==='escala-aula')enableScaleBooking();
  by('name').value=['vaga','livre-reposicao'].includes(e?.type)?'':(e?.name||'');
  by('time').value=e?.time||'14:00';
- by('date').value=e?.date||iso(d.getFullYear(),d.getMonth(),d.getDate());by('swapWeekDate').value=by('date').value;
+ // Para aulas fixas, usar a data clicada na agenda, não a data histórica do cadastro.
+ const dateForForm=e?.type==='aula'?iso(d.getFullYear(),d.getMonth(),d.getDate()):(e?.date||iso(d.getFullYear(),d.getMonth(),d.getDate()));
+ by('date').value=dateForForm;by('swapWeekDate').value=dateForForm;
  by('weekday').value=String(e?.weekday??d.getDay());
  by('notes').value=e?.notes||'';
  by('value').value=e?.value??'';by('scaleStudent').value=e?.studentId||'';
